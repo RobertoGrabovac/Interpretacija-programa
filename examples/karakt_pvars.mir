@@ -1,0 +1,80 @@
+// U ovom programu demonstriramo uporabu karakteristicnih propozicionalnih
+// varijabli. Kako nije omoguceno spremanje svjetova u varijablu, ako zelimo 
+// "zapamtiti" neki svijet mozemo spremiti njegovu karakteristicnu prop. var.
+// u formulu te iteriranjem po svjetovima kasnije dohvatiti trazeni svijet.
+
+// Karakteristicna prop. varijabla za svijet @w nazvana je $_w te je istinita
+// samo na svijetu @w.
+
+// Koristimo pomocni svijet @pv na kojem su istinite samo one prop. varijable koje su
+// karakteristicne, radi jednostavnijeg dohvata tih prop. var.
+
+koristi KP { @w1, @w2, @w3, @w4, @pv; $p1, $p2, $p3, $p4, $_w1, $_w2, $_w3, $_w4, $_pv };
+unesi << "kar_pvars_rel.mir" << "kar_pvars_val.mir";
+
+formula kar = F;
+formula test = []($p1 | $p2);
+formula tmp = F;
+int #done = 0;
+
+// Izdvajamo prvi svijet u kojem je istinita formula test (to je ovdje samo @w4).
+foreach @w {
+    if (#done == 1) break;
+    if (test ? @w) {
+        tmp = $_pv;
+        if (tmp ? @w) continue;
+        foreach $p {
+            tmp = $p;
+            if (tmp ? @w) {
+                if (tmp ? @pv) {
+                    kar = tmp;
+                    #done = 1;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+ispiši << kar << nr; // ovdje bi se trebalo ispisati $_w4
+
+// Sada je u varijablu `kar` "spremljen" svijet @w4 te ga lako mozemo koristiti. Recimo da 
+// pozelimo ispisati onaj svijet za kojeg je istinita formula test (i ne znamo da je to @w4).
+
+foreach @w {
+    if (kar ? @w) {
+        tmp = $_pv;
+        if (tmp ? @w)
+            continue;
+        else ispiši << @w;
+    }
+}
+
+// Jos jedna primjena karakteristicnih prop. varijabli je trazenje sljedbenika odnosno
+// prethodnika pojedinog svijeta.
+
+// Trazimo sljedbenike od @w2 (to su @w3 i @w4):
+ispiši << nr << nr;
+foreach $p {
+    tmp = <>$p;
+    if (tmp ? @w2) {
+        kar = $p;
+        if (kar ? @pv) {
+            foreach @w {
+                if (kar ? @w) {
+                    tmp = $_pv;
+                    if (tmp ? @w)
+                        continue;
+                    else ispiši << @w;
+                }
+            }
+        }
+    }
+}
+
+// Trazimo prethodnike od @w3 (to su @w1, @w2 i @w3):
+ispiši << nr << nr;
+foreach @w {
+    tmp = <>$_w3;
+    if (tmp ? @w) ispiši << @w;
+}
